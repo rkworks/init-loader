@@ -140,6 +140,11 @@ example, 00_foo.el, 01_bar.el ... 99_keybinds.el."
   :group 'init-loader
   :type 'regexp)
 
+(defcustom init-loader-sort-function #'init-loader-lexicographical-sort
+  "Function to sort configuration files."
+  :group 'init-loader
+  :type 'function)
+
 ;;;###autoload
 (defun* init-loader-load (&optional (init-dir init-loader-directory))
   "Load configuration files in INIT-DIR."
@@ -220,7 +225,10 @@ example, 00_foo.el, 01_bar.el ... 99_keybinds.el."
                       (and (string-match "el\\'" el)
                            (not (locate-library (concat el "c"))))))
         collect (file-name-nondirectory el) into ret
-        finally return (if sort (sort ret 'string<) ret)))
+        finally return (if sort (funcall init-loader-sort-function ret) ret)))
+
+(defun init-loader-lexicographical-sort (files)
+  (sort files 'string<))
 
 ;;;###autoload
 (defun init-loader-show-log ()
